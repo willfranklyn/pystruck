@@ -27,15 +27,10 @@ io.on("connection", socket => {
         console.log('reason for disconnect: ', reason);
     });
 
-    socket.on("hello", () => {
-        console.log('SocketStruck says hello!');
-    });
-
-    socket.on("runCode", code => {
+    socket.on("runCode", (code, callback) => {
         let response = '';
         console.log('Code: ', code);
         this.ptyProcess = pty.spawn('python3');
-        console.log('PTY: ', this.ptyProcess);
         this.ptyProcess.on("data", data => {
             response += data;
         });
@@ -44,16 +39,13 @@ io.on("connection", socket => {
 
         setTimeout(() => {
             console.log('response: ', response);
+            callback(response);
         }, 200);
         // this.ptyProcess.write(code.code);
         // this.ptyProcess.write('\r');
     });
 
     console.log('Socket connection made');
-});
-
-io.on("hello", socket => {
-    console.log('SocketStruck says hello!');
 });
 
 server.listen(9876, () => {
