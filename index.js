@@ -25,6 +25,7 @@ io.on("connection", socket => {
     this.ptyProcess = null;
     socket.on("disconnect", reason => {
         console.log('reason for disconnect: ', reason);
+        // this.ptyProcess.write('docker kill test_container');
     });
 
     socket.on("runCode", (code, callback) => {
@@ -36,6 +37,8 @@ io.on("connection", socket => {
         });
 
         this.ptyProcess.write(code.code + '\r');
+
+        // this.ptyProcess.write(`docker run --name test_container -it --rm replco/prybar prybar-python3 -i "echo "print('Hello, world ')" >> ab.py; python ./ab.py"\r`);
 
         setTimeout(() => {
             console.log('response: ', response);
