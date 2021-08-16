@@ -22,30 +22,39 @@ io.sockets.on('disconnect', ()=> {
 });
 
 io.on("connection", socket => {
-    this.ptyProcess = null;
+    // this.ptyProcess = null;
+
     socket.on("disconnect", reason => {
         console.log('reason for disconnect: ', reason);
         // this.ptyProcess.write('docker kill test_container');
     });
 
     socket.on("runCode", (code, callback) => {
-        let response = '';
+        
         console.log('Code: ', code);
-        this.ptyProcess = pty.spawn('python3');
+        // this.ptyProcess = pty.spawn('zsh');
+        let response = '';
+        this.ptyProcess = pty.spawn('zsh');
+        
+
+        // this.ptyProcess.write(code.code + '\r');
+
+        // this.ptyProcess.write('docker create --rm -it --name test_container python:3.6-alpine');
+        // this.ptyProcess.write('docker start test_container');
+
         this.ptyProcess.on("data", data => {
             response += data;
         });
 
-        this.ptyProcess.write(code.code + '\r');
+        this.ptyProcess.write(`docker run --name test_container -it --rm replco/prybar prybar-python3 "echo ${code.code} >> index.py; python ./index.py"\r`);
 
-        // this.ptyProcess.write(`docker run --name test_container -it --rm replco/prybar prybar-python3 -i "echo "print('Hello, world ')" >> ab.py; python ./ab.py"\r`);
+        
+        // this.ptyProcess.write(`docker run --name test_container -it --rm python:3.6-alpine ash -c "echo \"print('hello world')\" >> index.py; python ./index.py"\r`);
 
         setTimeout(() => {
             console.log('response: ', response);
             callback(response);
         }, 200);
-        // this.ptyProcess.write(code.code);
-        // this.ptyProcess.write('\r');
     });
 
     console.log('Socket connection made');
